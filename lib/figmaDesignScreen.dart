@@ -1,4 +1,6 @@
-import 'navBarItem.dart';
+import 'widgets/navBarItem.dart';
+import 'constant.dart';
+import 'widgets/clipperContainer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
@@ -8,15 +10,11 @@ import 'package:music_player_ui/controller.dart';
 import 'figmaComponents/bottomLeftClippers.dart';
 import 'package:clay_containers/clay_containers.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter_audio_query/flutter_audio_query.dart' show FlutterAudioQuery;
+import 'package:flutter_audio_query/flutter_audio_query.dart' show FlutterAudioQuery, SongInfo;
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
+import 'sidebarLayouts/sidebar.dart';
 
-final Color primaryColor = Color(0xffedd3cb);
-final Color darkPrimaryColor = Color(0xff6f3d2e);
-final Color primaryColor2 = Color(0xffF5924B);
-final Color darkPrimaryColor2 = Color(0xffE6221C);
-final Color bgColor =Color(0xff22272B);
-
+// IconData playerIcon = Icons.play_arrow_rounded;
 
 class FigmaDesignScreen extends StatefulWidget {
   static String id="figmaDesignScreen";
@@ -27,41 +25,39 @@ class FigmaDesignScreen extends StatefulWidget {
 
 class _FigmaDesignScreenState extends State<FigmaDesignScreen> {
   late final FlutterAudioQuery audioQuery;
-  late AudioPlayer audioPlayer;
-  var files,songs;
+  var files;
+  late List<SongInfo> songs;
   bool started = false;
-  IconData playerIcon = Icons.play_arrow_rounded;
-  late Duration dd = Duration.zero;
-  Duration currentdd = Duration.zero;
+
 
   //String queryUrl = "/storage/emulated/0/Music/Uppukarauvadu.mp3";
 
   @override
   void initState() {
     super.initState();
-    audioPlayer = AudioPlayer();
+    //Provider.of<Controller>(context).audioPlayer = AudioPlayer();
     audioQuery = FlutterAudioQuery();
     positionChanger();
   }
   @override
   void dispose() {
-    audioPlayer.dispose();
+    Provider.of<Controller>(context, listen: false).audioPlayer.dispose();
     super.dispose();
   }
   void playLocal(String localPath) async {
-    await audioPlayer.play(localPath, isLocal: true);
+    await Provider.of<Controller>(context, listen: false).audioPlayer.play(localPath, isLocal: true);
   }
   void playResume(){
-    if(audioPlayer.state == PlayerState.PLAYING){
-      audioPlayer.pause();
+    if(Provider.of<Controller>(context, listen: false).audioPlayer.state == PlayerState.PLAYING){
+      Provider.of<Controller>(context, listen: false).audioPlayer.pause();
       setState(() {
-        playerIcon = Icons.play_arrow_rounded;
+        Provider.of<Controller>(context, listen: false).togglePlayerIcon();
       });
     }
-    else if(audioPlayer.state == PlayerState.PAUSED){
-      audioPlayer.resume();
+    else if(Provider.of<Controller>(context, listen: false).audioPlayer.state == PlayerState.PAUSED){
+      Provider.of<Controller>(context, listen: false).audioPlayer.resume();
       setState(() {
-        playerIcon = Icons.pause_rounded;
+        Provider.of<Controller>(context, listen: false).togglePlayerIcon();
       });
     }
   }
@@ -69,14 +65,13 @@ class _FigmaDesignScreenState extends State<FigmaDesignScreen> {
     var status = await Permission.storage.status;
     if(!status.isGranted)
       await Permission.storage.request();
-    audioPlayer.onDurationChanged.listen((event) {
+    Provider.of<Controller>(context, listen: false).audioPlayer.onDurationChanged.listen((event) {
         Provider.of<Controller>(context,listen: false).Pos(event);
       });
-      audioPlayer.onAudioPositionChanged.listen((event) {
+    Provider.of<Controller>(context, listen: false).audioPlayer.onAudioPositionChanged.listen((event) {
         Provider.of<Controller>(context,listen: false).currentPos(event);
       });
   }
-
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
@@ -85,61 +80,42 @@ class _FigmaDesignScreenState extends State<FigmaDesignScreen> {
       future: audioQuery.getSongs(),
       builder: (context, snapshot){
         if(snapshot.hasData) {
-          songs = snapshot.data;
-          print(songs.length);
+          songs =  snapshot.data as List<SongInfo> ;
           return SafeArea(
             child: Scaffold(
               backgroundColor: bgColor,
               body: Stack(
                 //alignment: Alignment.center,
                 children: <Widget>[
-                  Align(
-                    alignment: Alignment(30, -1),
-                    child: ClipShadowPath(
-                      shadow: BoxShadow(
-                        color: Colors.black26.withOpacity(0.1),
-                        offset: Offset(-3, 3),
-                        blurRadius: 5,
-                        spreadRadius: 5,
-                      ),
-                      clipper: TopRightClipper(),
-                      child: Container(
-                        width: width * 0.99,
-                        color: bgColor,
-                      ),
-                    ),
+                  ClipperContainer(
+                      adjustM: 0.99,
+                      type: 2,
+                      shadowDesign: topRightClipperDec,
+                      alignmentX: 30,
+                      alignmentY: -1,
+                      clipperItem: TopRightClipper(),
+                      height: height,
+                      width: width,
                   ),
-                  Align(
-                    alignment: Alignment(0, 3.5),
-                    child: ClipShadowPath(
-                      shadow: BoxShadow(
-                        color: Colors.red.withOpacity(0.5),
-                        offset: Offset(-3, 3),
-                        blurRadius: 5,
-                        spreadRadius: 9,
-                      ),
-                      clipper: BottomLeftBgClipper(),
-                      child: Container(
-                        height: height * 0.79,
-                        color: bgColor,
-                      ),
-                    ),
+                  ClipperContainer(
+                      adjustM: 0.79,
+                      type: 1,
+                      shadowDesign:bottomLeftBgClipperDec,
+                      alignmentX: 0,
+                      alignmentY: 3.5,
+                      clipperItem: BottomLeftBgClipper(),
+                      height: height,
+                      width: width
                   ),
-                  Align(
-                    alignment: Alignment(0, 2.5),
-                    child: ClipShadowPath(
-                      shadow: BoxShadow(
-                        color: Colors.black26.withOpacity(0.5),
-                        offset: Offset(-5, 1),
-                        blurRadius: 10,
-                        spreadRadius: 10,
-                      ),
-                      clipper: BottomLeftClipper(),
-                      child: Container(
-                        height: height * 0.60,
-                        color: bgColor,
-                      ),
-                    ),
+                  ClipperContainer(
+                      adjustM: 0.60,
+                      type: 1,
+                      shadowDesign:bottomLeftClipperDec,
+                      alignmentX: 0,
+                      alignmentY: 2.5,
+                      clipperItem: BottomLeftClipper(),
+                      height: height,
+                      width: width
                   ),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -152,12 +128,20 @@ class _FigmaDesignScreenState extends State<FigmaDesignScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
                             NavBarItem(icon: Icons.arrow_back,
-                              callbackFunction: (){},),
+                              callbackFunction: (){
+                                Navigator.pop(context);
+                              },),
                             Text('Playing Now', style: TextStyle(fontSize: 25,
                                 color: Colors.red,
                                 fontWeight: FontWeight.w500),),
                             NavBarItem(
-                              icon: Icons.list, callbackFunction: (){},),
+                              icon: Icons.queue_music_rounded,
+                              callbackFunction: (){
+                                setState(() {
+                                  onIconPressed();
+                                });
+                                },
+                            ),
                           ],
                         ),
                       ),
@@ -169,7 +153,7 @@ class _FigmaDesignScreenState extends State<FigmaDesignScreen> {
                           width: 250,
                           borderRadius: 250,
                           child: StreamBuilder<Duration>(
-                              stream: audioPlayer.onAudioPositionChanged,
+                              stream: Provider.of<Controller>(context, listen: false).audioPlayer.onAudioPositionChanged,
                               builder: (context, snapshot) {
                                 return AnimatedContainer(
                                   curve: Curves.linear,
@@ -196,7 +180,7 @@ class _FigmaDesignScreenState extends State<FigmaDesignScreen> {
                         ),
                       ),
                       StreamBuilder<Duration>(
-                          stream: audioPlayer.onAudioPositionChanged,
+                          stream: Provider.of<Controller>(context, listen: false).audioPlayer.onAudioPositionChanged,
                           builder: (context, snapshot) {
                             return Padding(
                               padding: const EdgeInsets.symmetric(
@@ -214,7 +198,7 @@ class _FigmaDesignScreenState extends State<FigmaDesignScreen> {
                                     .of<Controller>(context, listen: false)
                                     .dd,
                                 onSeek: (duration) {
-                                  audioPlayer.seek(duration);
+                                  Provider.of<Controller>(context, listen: false).audioPlayer.seek(duration);
                                 },
                               ),
                             );
@@ -230,41 +214,39 @@ class _FigmaDesignScreenState extends State<FigmaDesignScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: <Widget>[
-                            Icon(Icons.repeat),
+                            Icon(Icons.repeat, color: Colors.red),
                             IconButton(onPressed: null,
-                                icon: Icon(Icons.skip_previous_rounded)),
-                            IconButton(
-                                onPressed: () {
+                                icon: Icon(Icons.skip_previous_rounded, color: Colors.red,)),
+                            IconButton(onPressed: () {
                                   if (started == false) {
                                     setState(() {
-                                      playerIcon = Icons.pause_rounded;
+                                      Provider.of<Controller>(context, listen: false).togglePlayerIcon();
                                     });
                                     //playLocal("storage/emulated/0/Music/Uppukarauvadu.mp3");
-                                    //print(songs.length);
-                                    playLocal(songs[733].filePath);
+                                    playLocal(songs[0].filePath);
                                     started = true;
                                   }
                                   else
                                     playResume();
                                 },
-                                icon: Icon(playerIcon)),
+                                icon: Icon(Provider.of<Controller>(context, listen: false).playerIcon, color: Colors.red)),
                             IconButton(onPressed: null,
-                                icon: Icon(Icons.skip_next_rounded)),
+                                icon: Icon(Icons.skip_next_rounded, color: Colors.red)),
                             IconButton(onPressed: () {
-                              audioPlayer.stop();
+                              Provider.of<Controller>(context, listen: false).audioPlayer.stop();
                               started = false;
                               setState(() {
-                                playerIcon = Icons.play_arrow_rounded;
-                                Provider.of<Controller>(context, listen: false)
-                                    .stopPos();
+                                Provider.of<Controller>(context, listen: false).togglePlayerIcon();
+                                Provider.of<Controller>(context, listen: false).stopPos();
                               });
                             },
-                                icon: Icon(Icons.stop_rounded)),
+                                icon: Icon(Icons.stop_rounded, color: Colors.red)),
                           ],
                         ),
                       ),
                     ],
                   ),
+                  Sidebar(songs: songs,),
                 ],
               ),
             ),
@@ -330,20 +312,20 @@ class _ClipShadowShadowPainter extends CustomPainter {
 
 
 // Function fileReader = () async{
-//   var filess;
+//   var files;
 //   //List<FileSystemEntity> _songs = [];
 //   // final List<Directory>? dir = await getExternalStorageDirectories();
 //   // final Directory? dir2 = await getExternalStorageDirectory();
 //   //if(dir!= null)
-//     // for(int i=0;i<filess.length;i++) {
-//     //   print("${filess[i]}");
+//     // for(int i=0;i<files.length;i++) {
+//     //   print("${files[i]}");
 //     // }
 //   // var status = await Permission.storage.status;
 //   // if(!status.isGranted)
 //   //   await Permission.storage.request();
 //   // if(status.isGranted){
-//   //   //filess = Directory("/storage/emulated/0/").listSync(recursive: true);
-//   //   for(FileSystemEntity entity in filess) {
+//   //   //files = Directory("/storage/emulated/0/").listSync(recursive: true);
+//   //   for(FileSystemEntity entity in files) {
 //   //     String path = entity.path;
 //   //     if(path.endsWith('.mp3')) {
 //   //       _songs.add(entity);
