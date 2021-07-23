@@ -77,7 +77,6 @@ class _SidebarState extends State<Sidebar> with SingleTickerProviderStateMixin<S
               Container(
                 color: Colors.red.withOpacity(0.5),
                 child: ListView(
-                  //mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: songsList,
                 ),
               ),

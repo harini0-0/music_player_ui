@@ -1,7 +1,8 @@
-import 'widgets/navBarItem.dart';
 import 'constant.dart';
-import 'widgets/clipperContainer.dart';
 import 'loadingScreen.dart';
+import 'widgets/navBarItem.dart';
+import 'sidebarLayouts/sidebar.dart';
+import 'widgets/clipperContainer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
@@ -11,12 +12,10 @@ import 'package:music_player_ui/controller.dart';
 import 'figmaComponents/bottomLeftClippers.dart';
 import 'package:clay_containers/clay_containers.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter_audio_query/flutter_audio_query.dart' show FlutterAudioQuery, SongInfo;
-import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:flutter_neumorphic/flutter_neumorphic.dart';
-import 'sidebarLayouts/sidebar.dart';
+import 'package:flutter_audio_query/flutter_audio_query.dart';
+import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 
-// IconData playerIcon = Icons.play_arrow_rounded;
 
 class FigmaDesignScreen extends StatefulWidget {
   static String id="figmaDesignScreen";
@@ -36,7 +35,6 @@ class _FigmaDesignScreenState extends State<FigmaDesignScreen> {
   @override
   void initState() {
     super.initState();
-    //Provider.of<Controller>(context).audioPlayer = AudioPlayer();
     audioQuery = FlutterAudioQuery();
     positionChanger();
     Provider.of<Controller>(context,listen: false).audioPlayer.onPlayerCompletion.listen((event) {
@@ -51,6 +49,7 @@ class _FigmaDesignScreenState extends State<FigmaDesignScreen> {
     Provider.of<Controller>(context, listen: false).audioPlayer.dispose();
     super.dispose();
   }
+
   void playLocal(String localPath) async {
     await Provider.of<Controller>(context, listen: false).audioPlayer.play(localPath, isLocal: true);
   }
@@ -79,6 +78,7 @@ class _FigmaDesignScreenState extends State<FigmaDesignScreen> {
         Provider.of<Controller>(context,listen: false).currentPos(event);
       });
   }
+
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
@@ -93,7 +93,6 @@ class _FigmaDesignScreenState extends State<FigmaDesignScreen> {
             child: Scaffold(
               backgroundColor: bgColor,
               body: Stack(
-                //alignment: Alignment.center,
                 children: <Widget>[
                   ClipperContainer(
                       adjustM: 0.99,
@@ -145,8 +144,6 @@ class _FigmaDesignScreenState extends State<FigmaDesignScreen> {
                                 shadowLightColor: Color(0xff946f6f),
                                 shadowDarkColor: Color(0xff130707),
                                 depth: 3,
-                                //shadowLightColor: Colors.grey.shade800,
-                                // lightSource: LightSource.bottom
                               ),
                               textStyle: NeumorphicTextStyle(
                                 fontSize: 30,
@@ -217,7 +214,6 @@ class _FigmaDesignScreenState extends State<FigmaDesignScreen> {
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
-                                //Text("${songs[Provider.of<Controller>(context, listen: false).currentIndex].displayName}"),
                                 SizedBox(height: 20,),
                                 Padding(
                                   padding: const EdgeInsets.symmetric(
@@ -275,7 +271,6 @@ class _FigmaDesignScreenState extends State<FigmaDesignScreen> {
                                     setState(() {
                                       Provider.of<Controller>(context, listen: false).togglePlayerIcon();
                                     });
-                                    //playLocal("storage/emulated/0/Music/Uppukarauvadu.mp3");
                                     playLocal(songs[Provider.of<Controller>(context, listen: false).currentIndex].filePath);
                                     started = true;
                                   }
@@ -379,29 +374,11 @@ class _ClipShadowShadowPainter extends CustomPainter {
 
 
 
-// Function fileReader = () async{
-//   var files;
-//   //List<FileSystemEntity> _songs = [];
-//   // final List<Directory>? dir = await getExternalStorageDirectories();
-//   // final Directory? dir2 = await getExternalStorageDirectory();
-//   //if(dir!= null)
-//     // for(int i=0;i<files.length;i++) {
-//     //   print("${files[i]}");
-//     // }
-//   // var status = await Permission.storage.status;
-//   // if(!status.isGranted)
-//   //   await Permission.storage.request();
-//   // if(status.isGranted){
 //   //   //files = Directory("/storage/emulated/0/").listSync(recursive: true);
 //   //   for(FileSystemEntity entity in files) {
 //   //     String path = entity.path;
 //   //     if(path.endsWith('.mp3')) {
 //   //       _songs.add(entity);
-//   //       print(path);
 //   //     }
 //   //     print(path);
 //   //   }
-//   // }
-//   //print(songs[1].filePath);
-//   print("hi");
-// };

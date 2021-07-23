@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../figmaDesignScreen.dart';
+import '../playerDesignScreen.dart';
 import '../constant.dart';
 
 class ClipperContainer extends StatelessWidget{

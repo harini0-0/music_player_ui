@@ -1,13 +1,13 @@
-import 'dart:typed_data';
 import 'dart:ui';
-import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter/cupertino.dart';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_audio_query/flutter_audio_query.dart';
-import 'package:music_player_ui/figmaDesignScreen.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:music_player_ui/controller.dart';
+import 'package:flutter_audio_query/flutter_audio_query.dart';
+
 
 class SongItemBubble extends StatefulWidget {
   final SongInfo songVar;
@@ -31,7 +31,7 @@ class _SongItemBubbleState extends State<SongItemBubble> {
               Provider.of<Controller>(context, listen: false).stopPos();
               Provider.of<Controller>(context, listen: false).audioPlayer.stop();
               Provider.of<Controller>(context, listen: false).audioPlayer.play(widget.songVar.filePath, isLocal: true);
-              if(Provider.of<Controller>(context,listen: false).audioPlayer.state == PlayerState.PAUSED){
+              if(Provider.of<Controller>(context,listen: false).audioPlayer.state == PlayerState.PAUSED || Provider.of<Controller>(context,listen: false).audioPlayer.state == PlayerState.STOPPED){
                 setState(() {
                   Provider.of<Controller>(context, listen: false).spltoggle();
                 });
