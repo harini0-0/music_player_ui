@@ -1,6 +1,7 @@
 import 'widgets/navBarItem.dart';
 import 'constant.dart';
 import 'widgets/clipperContainer.dart';
+import 'loadingScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
@@ -12,6 +13,7 @@ import 'package:clay_containers/clay_containers.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_audio_query/flutter_audio_query.dart' show FlutterAudioQuery, SongInfo;
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
+import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 import 'sidebarLayouts/sidebar.dart';
 
 // IconData playerIcon = Icons.play_arrow_rounded;
@@ -29,7 +31,6 @@ class _FigmaDesignScreenState extends State<FigmaDesignScreen> {
   late List<SongInfo> songs;
   bool started = false;
 
-
   //String queryUrl = "/storage/emulated/0/Music/Uppukarauvadu.mp3";
 
   @override
@@ -38,6 +39,12 @@ class _FigmaDesignScreenState extends State<FigmaDesignScreen> {
     //Provider.of<Controller>(context).audioPlayer = AudioPlayer();
     audioQuery = FlutterAudioQuery();
     positionChanger();
+    Provider.of<Controller>(context,listen: false).audioPlayer.onPlayerCompletion.listen((event) {
+      int next =  Provider.of<Controller>(context,listen: false).currentIndex;
+      next = (next+1) % songs.length;
+      Provider.of<Controller>(context,listen: false).audioPlayer.play(songs[next].filePath, isLocal: true);
+      Provider.of<Controller>(context,listen: false).updateCurrentIndex(next);
+    });
   }
   @override
   void dispose() {
@@ -76,6 +83,7 @@ class _FigmaDesignScreenState extends State<FigmaDesignScreen> {
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
+
     return FutureBuilder(
       future: audioQuery.getSongs(),
       builder: (context, snapshot){
@@ -129,11 +137,22 @@ class _FigmaDesignScreenState extends State<FigmaDesignScreen> {
                           children: <Widget>[
                             NavBarItem(icon: Icons.arrow_back,
                               callbackFunction: (){
-                                Navigator.pop(context);
+                                //Navigator.pop(context);
                               },),
-                            Text('Playing Now', style: TextStyle(fontSize: 25,
+                            NeumorphicText("Playing Now",
+                              style: NeumorphicStyle(
                                 color: Colors.red,
-                                fontWeight: FontWeight.w500),),
+                                shadowLightColor: Color(0xff946f6f),
+                                shadowDarkColor: Color(0xff130707),
+                                depth: 3,
+                                //shadowLightColor: Colors.grey.shade800,
+                                // lightSource: LightSource.bottom
+                              ),
+                              textStyle: NeumorphicTextStyle(
+                                fontSize: 30,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                             NavBarItem(
                               icon: Icons.queue_music_rounded,
                               callbackFunction: (){
@@ -144,7 +163,7 @@ class _FigmaDesignScreenState extends State<FigmaDesignScreen> {
                             ),
                           ],
                         ),
-                      ),
+                      ), //AppHeader
                       Center(
                         child: ClayContainer(
                           emboss: true,
@@ -178,32 +197,52 @@ class _FigmaDesignScreenState extends State<FigmaDesignScreen> {
                               }
                           ),
                         ),
-                      ),
+                      ), //PlayDisk
                       StreamBuilder<Duration>(
                           stream: Provider.of<Controller>(context, listen: false).audioPlayer.onAudioPositionChanged,
                           builder: (context, snapshot) {
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12),
-                              child: ProgressBar(
-                                baseBarColor: primaryColor2,
-                                progressBarColor: darkPrimaryColor2,
-                                thumbColor: Colors.red,
-                                bufferedBarColor: Colors.white30,
-                                thumbRadius: 10,
-                                progress: Provider
-                                    .of<Controller>(context, listen: false)
-                                    .currentdd,
-                                total: Provider
-                                    .of<Controller>(context, listen: false)
-                                    .dd,
-                                onSeek: (duration) {
-                                  Provider.of<Controller>(context, listen: false).audioPlayer.seek(duration);
-                                },
-                              ),
+                            return Column(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(8),
+                                  child: Text(
+                                      songs[Provider.of<Controller>(context, listen: false).currentIndex].displayName,
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      color: Colors.red,
+                                      fontStyle: FontStyle.italic,
+                                      letterSpacing: 0.5,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                //Text("${songs[Provider.of<Controller>(context, listen: false).currentIndex].displayName}"),
+                                SizedBox(height: 20,),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12),
+                                  child: ProgressBar(
+                                    baseBarColor: primaryColor2,
+                                    progressBarColor: darkPrimaryColor2,
+                                    thumbColor: Colors.red,
+                                    bufferedBarColor: Colors.white30,
+                                    thumbRadius: 10,
+                                    progress: Provider
+                                        .of<Controller>(context, listen: false)
+                                        .currentdd,
+                                    total: Provider
+                                        .of<Controller>(context, listen: false)
+                                        .dd,
+                                    onSeek: (duration) {
+                                      Provider.of<Controller>(context, listen: false).audioPlayer.seek(duration);
+                                    },
+                                  ),
+                                ),
+                              ],
                             );
                           }
-                      ),
+                      ), //Duration Slider
                       ClayContainer(
                         emboss: true,
                         color: bgColor,
@@ -215,7 +254,21 @@ class _FigmaDesignScreenState extends State<FigmaDesignScreen> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: <Widget>[
                             Icon(Icons.repeat, color: Colors.red),
-                            IconButton(onPressed: null,
+                            IconButton(
+                                onPressed: (){
+                                  if(Provider.of<Controller>(context,listen: false).currentIndex == 0)
+                                    Provider.of<Controller>(context,listen: false).updateCurrentIndex(songs.length - 1);
+                                  else
+                                    Provider.of<Controller>(context,listen: false).updateCurrentIndex(Provider.of<Controller>(context,listen: false).currentIndex -1 );
+                                  Provider.of<Controller>(context, listen: false).stopPos();
+                                  Provider.of<Controller>(context, listen: false).audioPlayer.stop();
+                                  Provider.of<Controller>(context, listen: false).audioPlayer.play(songs[Provider.of<Controller>(context,listen: false).currentIndex].filePath, isLocal: true);
+                                  if(Provider.of<Controller>(context,listen: false).audioPlayer.state == PlayerState.PAUSED){
+                                    setState(() {
+                                      Provider.of<Controller>(context, listen: false).spltoggle();
+                                    });
+                                  }
+                                },
                                 icon: Icon(Icons.skip_previous_rounded, color: Colors.red,)),
                             IconButton(onPressed: () {
                                   if (started == false) {
@@ -223,27 +276,43 @@ class _FigmaDesignScreenState extends State<FigmaDesignScreen> {
                                       Provider.of<Controller>(context, listen: false).togglePlayerIcon();
                                     });
                                     //playLocal("storage/emulated/0/Music/Uppukarauvadu.mp3");
-                                    playLocal(songs[0].filePath);
+                                    playLocal(songs[Provider.of<Controller>(context, listen: false).currentIndex].filePath);
                                     started = true;
                                   }
                                   else
                                     playResume();
                                 },
                                 icon: Icon(Provider.of<Controller>(context, listen: false).playerIcon, color: Colors.red)),
-                            IconButton(onPressed: null,
+                            IconButton(
+                                onPressed: (){
+                                  if(Provider.of<Controller>(context,listen: false).currentIndex == songs.length - 1)
+                                    Provider.of<Controller>(context,listen: false).updateCurrentIndex(0);
+                                  else
+                                    Provider.of<Controller>(context,listen: false).updateCurrentIndex(Provider.of<Controller>(context,listen: false).currentIndex + 1 );
+                                  Provider.of<Controller>(context, listen: false).stopPos();
+                                  Provider.of<Controller>(context, listen: false).audioPlayer.stop();
+                                  Provider.of<Controller>(context, listen: false).audioPlayer.play(songs[Provider.of<Controller>(context,listen: false).currentIndex].filePath, isLocal: true);
+                                  if(Provider.of<Controller>(context,listen: false).audioPlayer.state == PlayerState.PAUSED){
+                                    setState(() {
+                                      Provider.of<Controller>(context, listen: false).spltoggle();
+                                    });
+                                  }
+                                },
                                 icon: Icon(Icons.skip_next_rounded, color: Colors.red)),
                             IconButton(onPressed: () {
-                              Provider.of<Controller>(context, listen: false).audioPlayer.stop();
                               started = false;
                               setState(() {
-                                Provider.of<Controller>(context, listen: false).togglePlayerIcon();
+                                if(Provider.of<Controller>(context,listen: false).audioPlayer.state == PlayerState.PLAYING){
+                                  Provider.of<Controller>(context, listen: false).togglePlayerIcon();
+                                }
                                 Provider.of<Controller>(context, listen: false).stopPos();
                               });
+                              Provider.of<Controller>(context, listen: false).audioPlayer.stop();
                             },
                                 icon: Icon(Icons.stop_rounded, color: Colors.red)),
                           ],
                         ),
-                      ),
+                      ), //Player Controller
                     ],
                   ),
                   Sidebar(songs: songs,),
@@ -253,7 +322,7 @@ class _FigmaDesignScreenState extends State<FigmaDesignScreen> {
           );
         }
         else
-            return Scaffold(body: Center(child: Text("Loading..."),),);
+            return LoadingScreen();
       },
     );
   }
@@ -306,7 +375,6 @@ class _ClipShadowShadowPainter extends CustomPainter {
     return true;
   }
 }
-
 
 
 

@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../figmaDesignScreen.dart';
 import '../constant.dart';
-import '../figmaComponents/bottomLeftClippers.dart';
-import '../figmaComponents/topRightClipper.dart';
 
 class ClipperContainer extends StatelessWidget{
   final BoxShadow shadowDesign;
@@ -39,3 +37,4 @@ class ClipperContainer extends StatelessWidget{
       );
   }
 }
+

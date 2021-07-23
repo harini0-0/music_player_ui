@@ -2,6 +2,7 @@ import 'controller.dart';
 import 'package:flutter/material.dart';
 import 'figmaDesignScreen.dart';
 import 'package:provider/provider.dart';
+import 'loadingScreen.dart';
 
 void main() {
   runApp(MyApp());

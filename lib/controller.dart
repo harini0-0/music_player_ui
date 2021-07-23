@@ -9,6 +9,11 @@ class Controller extends ChangeNotifier{
   late AudioPlayer audioPlayer =AudioPlayer();
   int currentIndex = 0;
   IconData playerIcon = Icons.play_arrow_rounded;
+  void spltoggle(){
+    playerIcon = Icons.pause_rounded;
+    print("toggled");
+    notifyListeners();
+  }
   void togglePlayerIcon(){
     if(playerIcon == Icons.play_arrow_rounded){
       playerIcon = Icons.pause_rounded;

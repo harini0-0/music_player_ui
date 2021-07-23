@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 import 'package:music_player_ui/widgets/songItemBubble.dart';
 import 'package:flutter_audio_query/flutter_audio_query.dart';
 import 'package:rxdart/rxdart.dart';
@@ -69,12 +70,12 @@ class _SidebarState extends State<Sidebar> with SingleTickerProviderStateMixin<S
           duration: _animationDuration,
           top: 0,
           bottom: 0,
-          left: snapshot.data! ? screenWidth * 1/7: screenWidth,
+          left: snapshot.data! ? screenWidth * 1/11: screenWidth,
           right: 0,
           child: Stack(
             children: <Widget>[
               Container(
-                color: Colors.red,
+                color: Colors.red.withOpacity(0.5),
                 child: ListView(
                   //mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: songsList,
@@ -83,9 +84,9 @@ class _SidebarState extends State<Sidebar> with SingleTickerProviderStateMixin<S
               Align(
                 alignment: Alignment.topRight,
                 child: IconButton(
+                  color: Colors.black45,
                   icon: Icon(Icons.close),
                   onPressed: (){
-                    print("icon");
                     onIconPressed();
                   },
                 ),
